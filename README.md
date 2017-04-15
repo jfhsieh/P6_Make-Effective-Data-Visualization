@@ -31,7 +31,7 @@ Feedback 3
 ## Resources
 1. Udacity Discussion Forum website
 2. Dimple js website
-..* http://dimplejs.org/examples_viewer.html?id=bars_vertical_grouped
-..* http://dimplejs.org/advanced_examples_viewer.html?id=advanced_storyboard_control
+⋅⋅- http://dimplejs.org/examples_viewer.html?id=bars_vertical_grouped
+⋅⋅- http://dimplejs.org/advanced_examples_viewer.html?id=advanced_storyboard_control
 3. Kaggle website
-..* https://www.kaggle.com/c/titanic
+⋅⋅- https://www.kaggle.com/c/titanic
