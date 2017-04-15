@@ -1,0 +1,15 @@
+body {
+    text-align: center;
+}
+
+h1, p {
+  font-family: Calibri;
+  text-align: center;
+  color: black;
+  line-height: 50%;
+}
+
+text {
+  font-family: Calibri;
+  font-size : 12px;
+}
