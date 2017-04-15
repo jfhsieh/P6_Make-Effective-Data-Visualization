@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <style>
+      body {
+          text-align: center;
+      }
+
+      h1, p {
+        font-family: Calibri;
+        text-align: center;
+        color: black;
+        line-height: 50%;
+      }
+
+      text {
+        font-family: Calibri;
+        font-size : 12px;
+      }
+    </style>
+    <script type="text/javascript">
+      function draw(data) {
+        // Create Header
+        d3.select("body")
+          .append("h1")
+          .text("Survival Information of Titanic Data");
+
+        // Create Detail
+        var count = 0;
+        var count_male = 0;
+        var count_female = 0;
+        var count_upper = 0;
+        var count_middle = 0;
+        var count_lower = 0;
+        var count_fare_upper = 0;
+        var count_fare_middle = 0;
+        var count_fare_lower = 0;
+
+        for(var i = 0; i < data.length; ++i) {
+          count++;
+
+          if(data[i]["Sex"] == "male") {
+            count_male++;
+          }
+
+          if(data[i]["Sex"] == "female") {
+            count_female++;
+          }
+
+          if(data[i]["Pclass"] == "Upper") {
+            count_upper++;
+            count_fare_upper += +data[i]["Fare"];
+          }
+
+          if(data[i]["Pclass"] == "Middle") {
+            count_middle++;
+            count_fare_middle += +data[i]["Fare"];
+          }
+
+          if(data[i]["Pclass"] == "Lower") {
+            count_lower++;
+            count_fare_lower += +data[i]["Fare"];
+          }
+        }
+
+        var avg_fare_upper = (count_fare_upper / count_upper).toFixed(2);
+        var avg_fare_middle = (count_fare_middle / count_middle).toFixed(2);
+        var avg_fare_lower = (count_fare_lower / count_lower).toFixed(2);
+
+        d3.select("body")
+          .append("p")
+          .text("There are " + count + " passengers in the dataset. " + 
+                count_female + " of them are female and " + count_male + " are male.")
+          .append("p")
+          .text(count_upper + " people are upper class, " + 
+                count_middle + " are middle class, and " + 
+                count_lower + " are lower class.")
+          .append("p")
+          .text("Average fare of upper class is $" + avg_fare_upper + 
+                " , middle class is $" + avg_fare_middle + 
+                " , and lower class is $" + avg_fare_lower + " ."); 
+
+        // Set width and height
+        var margin = 100,
+            width = 800 - margin,
+            height = 600 - margin;
+
+        // Create svg element
+        var svg = dimple.newSvg("body", width + margin, height + margin);
+
+        // Create Chart
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(margin / 2, margin / 2, width, height)
+        var myChart_x = myChart.addCategoryAxis("x", ["Pclass", "Sex"]);
+        var myChart_y = myChart.addMeasureAxis("y", "Survived");
+        // Set x axis
+        myChart_x.title = "Class / Gender";
+        myChart_x.addOrderRule("Pclass", false);
+        var mySeries = myChart.addSeries("Sex", dimple.plot.bar);
+        mySeries.addOrderRule("Sex", true);
+        myChart.addLegend(margin, margin / 4, width, margin / 4, "right");
+        myChart.draw();
+      }
+    </script>
+  </head>
+<body>
+  <script type="text/javascript">
+    // Use d3 to load csv file
+    d3.csv("titanic_data.csv", function(d) {
+      // Add description for class
+      if(d["Pclass"] == "1") {
+          d["Pclass"] = "Upper";
+      } else if(d["Pclass"] == "2") {
+          d["Pclass"] = "Middle";
+      } else if(d["Pclass"] == "3") {
+          d["Pclass"] = "Lower";
+      }
+      return d;
+    }, draw);
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <style>
+      body {
+          text-align: center;
+      }
+
+      h1{
+        font-family: Calibri;
+        text-align: center;
+        color: black;
+      }
+
+      text {
+        font-family: Calibri;
+        font-size : 12px;
+      }
+    </style>
+    <script type="text/javascript">
+      function draw(data) {
+        // Create Header
+        d3.select("body")
+          .append("h1")
+          .text("Survival Information of Titanic Data");
+
+        // Set width and height
+        var margin = 100,
+            width = 800 - margin,
+            height = 600 - margin;
+
+        // Create svg element
+        var svg = dimple.newSvg("body", width + margin, height + margin);
+
+        // Create Chart
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(margin / 2, margin / 2, width, height)
+        myChart.addCategoryAxis("x", "Sex");
+        myChart.addMeasureAxis("y", "Survived");
+        myChart.addSeries("Sex", dimple.plot.bar);
+        myChart.addLegend(margin, margin / 4, width, margin / 4, "right");
+        myChart.draw();
+      }
+    </script>
+  </head>
+<body>
+  <script type="text/javascript">
+    // Use d3 to load csv file
+    d3.csv("titanic_data.csv", draw);
+  </script>
+</body>
+</html>

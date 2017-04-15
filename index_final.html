@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <style>
+      body {
+          text-align: center;
+      }
+
+      h1, p {
+        font-family: Calibri;
+        text-align: center;
+        color: black;
+        line-height: 50%;
+      }
+
+      text {
+        font-family: Calibri;
+        font-size : 12px;
+      }
+    </style>
+    <script type="text/javascript">
+      function draw(data) {
+        // Create Header
+        d3.select("body")
+          .append("h1")
+          .text("Survival Information of Titanic Data");
+
+        // Create Detail
+        var count = 0;
+        var count_survival = 0;
+        var count_s_male = 0;
+        var count_s_female = 0;
+        var count_male = 0;
+        var count_female = 0;
+        var count_upper = 0;
+        var count_middle = 0;
+        var count_lower = 0;
+        var count_fare_upper = 0;
+        var count_fare_middle = 0;
+        var count_fare_lower = 0;
+
+        for(var i = 0; i < data.length; ++i) {
+          count++;
+
+          count_survival += +data[i]["Survived"];
+
+          if(data[i]["Sex"] == "male") {
+            count_male++;
+            count_s_male += +data[i]["Survived"];
+          }
+
+          if(data[i]["Sex"] == "female") {
+            count_female++;
+            count_s_female += +data[i]["Survived"];
+          }
+
+          if(data[i]["Pclass"] == "Upper") {
+            count_upper++;
+            count_fare_upper += +data[i]["Fare"];
+          }
+
+          if(data[i]["Pclass"] == "Middle") {
+            count_middle++;
+            count_fare_middle += +data[i]["Fare"];
+          }
+
+          if(data[i]["Pclass"] == "Lower") {
+            count_lower++;
+            count_fare_lower += +data[i]["Fare"];
+          }
+        }
+
+        var avg_fare_upper = (count_fare_upper / count_upper).toFixed(2);
+        var avg_fare_middle = (count_fare_middle / count_middle).toFixed(2);
+        var avg_fare_lower = (count_fare_lower / count_lower).toFixed(2);
+
+        d3.select("body")
+          .append("p")
+          .text("There are " + count + " passengers in the dataset. " + 
+                count_female + " of them are female and " + count_male + " are male.")
+          .append("p")
+          .text("Only " + count_survival + " people are survived that has " +
+                count_s_female + " female and " + 
+                count_s_male + " male.")
+          .append("p")
+          .text(count_upper + " people are upper class, " + 
+                count_middle + " are middle class, and " + 
+                count_lower + " are lower class.")
+          .append("p")
+          .text("Average fare of upper class is $" + avg_fare_upper + 
+                " , middle class is $" + avg_fare_middle + 
+                " , and lower class is $" + avg_fare_lower + " ."); 
+
+        // Set width and height
+        var margin = 210,
+            width = 800 - margin,
+            height = 600 - margin;
+
+        // Set frame for the animation
+        var frame = 2000;
+
+        // Create svg element
+        var svg = dimple.newSvg("body", width + margin, height + margin);
+        
+        // ********** Create Filter **********
+        // Create Filter Title
+        svg.selectAll("title_text")
+           .data(["Click bar to show"," animation."])
+           .enter()
+           .append("text")
+           .attr("x", width + margin * 1 / 3)
+           .attr("y", function(d, i) { return margin * 1 / 3 + i * 12; })
+           .style("font-weight", "bold")
+           .text(function(d) { return d; });
+
+        // Create List for Filter
+        listGender = dimple.getUniqueValues(data, "Sex");
+        listGender.sort();
+
+        var filter = new dimple.chart(svg, data);
+        // Set default color of Filter is blue and yellow for the filter which is on focus
+        var defaultColor = filter.defaultColors[0];
+        var filterColor = filter.defaultColors[4];
+        // Set bounds for Filter
+        filter.setBounds(width + margin * 1 / 3, margin * 1 / 2, 
+                         margin * 1 / 3, margin * 1 / 3);
+        // Set gender as filter switch
+        var filter_y = filter.addCategoryAxis("y", "Sex");
+        // Use same variable to create the x axis and hide the axis
+        var filter_x = filter.addMeasureAxis("x", "Sex");
+        filter_x.hidden = true;
+        // Create filter and add event handler
+        var myFilter = filter.addSeries(null, dimple.plot.bar);
+        myFilter.getTooltipText = function(d) { return [d.cy]; };
+        myFilter.addEventHandler("click", function(e) {
+          // Pause the animation first
+          story.pauseAnimation();
+          // If Frame Value is same as filter, then keep going animation
+          if (e.yValue === story.getFrameValue()) {
+              story.startAnimation();
+          } else {
+              story.goToFrame(e.yValue);
+              story.pauseAnimation();
+          }
+        });
+        // Draw Filter
+        filter.draw();
+        // Remove the title of filter
+        filter_y.titleShape.remove();
+        // Remove the lines
+        filter_y.shapes.selectAll("line,path").remove();
+        // Move text of y axis in to the bar
+        filter_y.shapes.selectAll("text")
+                       .style("text-anchor", "start")
+                       .attr("transform", "translate(18, 1)");
+        // Adjust shape of bar and set the default color
+        myFilter.shapes.attr("rx", 10)
+                       .attr("ry", 10)
+                       .style("fill", function(d) { 
+                          if (d.y == listGender[0]) {
+                            return filterColor.fill;
+                          } else {
+                            return defaultColor.fill;
+                          }
+                        })
+                       .style("stroke", function(d) { 
+                          if (d.y == listGender[0]) {
+                            return filterColor.stroke;
+                          } else {
+                            return defaultColor.stroke;
+                          }
+                        })
+                       .style("opacity", 0.4);
+
+
+        // ********** Create Bar Chart **********
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(margin * 1 / 3, margin * 2 / 3, width, height);
+        var myChart_x = myChart.addCategoryAxis("x", "Pclass");
+        var myChart_y = myChart.addMeasureAxis("y", "Survived");
+        var mySeries = myChart.addSeries(null, dimple.plot.bar);
+        // Calculate average
+        mySeries.aggregate = dimple.aggregateMethod.avg;
+        // Set x axis
+        myChart_x.title = "Class";
+        myChart_x.addOrderRule("Pclass", false);
+        // Set y axis
+        myChart_y.title = "Survival Rate";
+        myChart_y.tickFormat = ".2%";
+        myChart_y.overrideMax = 1;
+        myChart_y.ticks = 10;
+
+        // Create Animation 
+        var story = myChart.setStoryboard("Sex", function(e) {
+            // Set color for filter which is on focus
+            myFilter.shapes.transition()
+                           .duration(frame / 4)
+                           .style("fill", function(d) { 
+                              if (d.y === e) {
+                                return filterColor.fill;
+                              } else {
+                                return defaultColor.fill;
+                              }
+                            })
+                           .style("stroke", function(d) { 
+                              if (d.y === e) {
+                                return filterColor.stroke;
+                              } else {
+                                return defaultColor.stroke;
+                              }
+                          });
+            // Pause the animation
+            story.pauseAnimation();
+        });
+        // Set the frame duration
+        story.frameDuration = frame;
+        // Set the order of storyboard
+        story.addOrderRule("Sex");
+
+        // Draw Chart
+        myChart.draw();
+
+        // Remove Story Label
+        story.storyLabel.remove();
+      }
+    </script>
+  </head>
+<body>
+  <script type="text/javascript">
+    // Use d3 to load csv file
+    d3.csv("titanic_data.csv", function(d) {
+      // Add description for class
+      if(d["Pclass"] == "1") {
+          d["Pclass"] = "Upper";
+      } else if(d["Pclass"] == "2") {
+          d["Pclass"] = "Middle";
+      } else if(d["Pclass"] == "3") {
+          d["Pclass"] = "Lower";
+      }
+      return d;
+    }, draw);
+  </script>
+</body>
+</html>
